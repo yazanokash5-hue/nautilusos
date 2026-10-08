@@ -732,9 +732,6 @@ let settings = {
   windowOpacity: 0.85,
 };
 let bootSelectedIndex = 0;
-let bootCountdownTimer = null;
-let bootCountdownValue = 10;
-let bootCountdownStarted = false;
 let snapSettings = null;
 let snapOverlay = null;
 let snapCandidate = null;
@@ -957,10 +954,9 @@ function closeToast(btn) {
 window.addEventListener("DOMContentLoaded", () => {
   const savedBootChoice = localStorage.getItem("nautilusOS_bootChoice");
   if (savedBootChoice !== null) {
-    bootSelectedIndex = parseInt(savedBootChoice, 10);
-    selectBoot();
+    bootSelectedIndex = parseInt(savedBootChoice, 10) === 1 ? 1 : 0;
   } else {
-    startBootCountdown();
+    bootSelectedIndex = 0;
   }
 });
 const appMetadata = {
@@ -975,6 +971,7 @@ const appMetadata = {
   appstore: { name: "App Store", icon: "fa-store", preinstalled: true },
   calculator: { name: "Calculator", icon: "fa-calculator", preinstalled: true },
   browser: { name: "Nautilus Browser", icon: "fa-globe", preinstalled: true },
+  "ideal-spork": { name: "Ideal Spork", icon: "fa-globe", preinstalled: true },
   cloaking: { name: "Cloaking", icon: "fa-mask", preinstalled: true },
   achievements: { name: "Achievements", icon: "fa-trophy", preinstalled: true },
   python: { name: "Python Interpreter", icon: "fa-code", preinstalled: true },
@@ -1955,81 +1952,22 @@ function togglePassword() {
   }
 }
 
-document.addEventListener("keydown", function (e) {
-  const bootloader = document.getElementById("bootloader");
-  if (
-    !bootloader.classList.contains("hidden") &&
-    document.getElementById("bootOptions").style.display !== "none"
-  ) {
-    const options = document.querySelectorAll(".boot-option");
-
-    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      e.preventDefault();
-      if (bootCountdownTimer) {
-        clearInterval(bootCountdownTimer);
-        bootCountdownTimer = null;
-      }
-      const countdownEl = document.getElementById("bootCountdown");
-      if (countdownEl) {
-        countdownEl.style.display = "none";
-      }
-      options[bootSelectedIndex].classList.remove("selected");
-      if (e.key === "ArrowDown") {
-        bootSelectedIndex = (bootSelectedIndex + 1) % options.length;
-      } else {
-        bootSelectedIndex =
-          (bootSelectedIndex - 1 + options.length) % options.length;
-      }
-      options[bootSelectedIndex].classList.add("selected");
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (bootCountdownTimer) {
-        clearInterval(bootCountdownTimer);
-        bootCountdownTimer = null;
-      }
-      const countdownEl = document.getElementById("bootCountdown");
-      if (countdownEl) {
-        countdownEl.style.display = "none";
-      }
-      selectBoot();
-    }
-  }
-});
-
-function startBootCountdown() {
-  const countdownEl = document.getElementById("bootCountdown");
-  if (!countdownEl) return;
-
-  bootCountdownValue = 10;
-  bootCountdownStarted = true;
-  countdownEl.style.display = "block";
-  countdownEl.textContent = `Booting to selected option in ${bootCountdownValue} seconds.`;
-
-  bootCountdownTimer = setInterval(() => {
-    bootCountdownValue--;
-    if (bootCountdownValue <= 0) {
-      clearInterval(bootCountdownTimer);
-      bootCountdownTimer = null;
-      countdownEl.style.display = "none";
-      selectBoot();
-    } else {
-      countdownEl.textContent = `Booting to selected option in ${bootCountdownValue} seconds.`;
-    }
-  }, 1000);
+function enterComputerMode(mode = 0) {
+  bootSelectedIndex = mode === 1 ? 1 : 0;
+  localStorage.setItem("nautilusOS_bootChoice", String(bootSelectedIndex));
+  selectBoot();
 }
 
 function selectBoot() {
-  localStorage.setItem("nautilusOS_bootChoice", bootSelectedIndex);
+  localStorage.setItem("nautilusOS_bootChoice", String(bootSelectedIndex));
 
-  // Request fullscreen on boot
   if (document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(err => {
       console.log('Fullscreen request failed:', err);
     });
   }
 
-  document.getElementById("bootOptions").style.display = "none";
-  document.querySelector(".boot-hint").style.display = "none";
+  document.getElementById("studyLanding").hidden = true;
   document.getElementById("bootLoading").classList.add("active");
   startBootSequence();
 }
@@ -3393,6 +3331,15 @@ function openApp(appName, editorContent = "", filename = "") {
   // Handle custom web apps
   if (appName.startsWith("webapp_")) {
     launchCustomWebApp(appName);
+    return;
+  }
+
+  if (appName === "ideal-spork") {
+    openCustomWebAppWindow({
+      name: "Ideal Spork",
+      url: "https://ideal-spork-r4q5gg465wj5c99p-4173.app.github.dev",
+      icon: "fas fa-globe",
+    });
     return;
   }
 
@@ -7963,6 +7910,26 @@ function switchAppStoreSection(section, element) {
   } else if (section === "games") {
     const items = [
       {
+        name: "Roblox",
+        author: "Roblox Corporation",
+        desc: "Open the official Roblox website. Playing most experiences requires signing in and installing the official Roblox Player.",
+        icon: "fa-brands fa-roblox",
+        isInstalled: true,
+        installButtonText: "Play Roblox",
+        installAction: "launchGameWebsite('https://www.roblox.com/home')",
+        type: "game"
+      },
+      {
+        name: "Minecraft Classic",
+        author: "Mojang Studios",
+        desc: "Play the classic Minecraft browser edition. This is not the full Minecraft game.",
+        icon: "fas fa-cube",
+        isInstalled: true,
+        installButtonText: "Play Minecraft",
+        installAction: "launchGameWebsite('https://classic.minecraft.net/')",
+        type: "game"
+      },
+      {
         name: "Snake",
         author: "lanefiedler-731",
         desc: "A classic snake game. Eat food, grow longer, and try to beat your high score without hitting the walls or yourself!",
@@ -8020,6 +7987,16 @@ function switchAppStoreSection(section, element) {
       `;
   }
 }
+
+function launchGameWebsite(url) {
+  const gameWindow = window.open(url, "_blank");
+  if (!gameWindow) {
+    showToast("Allow pop-ups to open this game.", "fa-exclamation-circle");
+    return;
+  }
+  gameWindow.opener = null;
+}
+
 function installTheme(themeName) {
   if (installedThemes.includes(themeName)) {
     showToast("Theme already installed", "fa-info-circle");
@@ -10231,14 +10208,42 @@ let aiSnake = {
 };
 
 // Initialize AI Snake App
+let tensorflowLoadPromise = null;
+
+function loadTensorFlow() {
+  if (typeof tf !== "undefined") return Promise.resolve();
+  if (tensorflowLoadPromise) return tensorflowLoadPromise;
+
+  tensorflowLoadPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js";
+    script.onload = () => {
+      if (typeof tf === "undefined") {
+        tensorflowLoadPromise = null;
+        reject(new Error("TensorFlow.js loaded without exposing its API."));
+        return;
+      }
+      resolve();
+    };
+    script.onerror = () => {
+      tensorflowLoadPromise = null;
+      reject(new Error("TensorFlow.js could not be downloaded."));
+    };
+    document.head.appendChild(script);
+  });
+
+  return tensorflowLoadPromise;
+}
+
 async function initializeAISnakeApp() {
-  if (typeof tf === 'undefined') {
-    updateAITrainingStatus('Loading TensorFlow.js...');
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    if (typeof tf === 'undefined') {
-      updateAITrainingStatus('Error: TensorFlow.js failed to load. Please refresh the page.');
-      return;
-    }
+  updateAITrainingStatus("Loading TensorFlow.js...");
+  try {
+    await loadTensorFlow();
+  } catch (error) {
+    console.error("Failed to load TensorFlow.js:", error);
+    updateAITrainingStatus("Error: TensorFlow.js failed to load. Check your connection and try again.");
+    showToast("AI Snake needs TensorFlow.js, which could not be loaded.", "fa-exclamation-circle");
+    return;
   }
 
   aiSnake.canvas = document.getElementById('aiSnakeCanvas');

@@ -109,13 +109,150 @@ input {
     z-index: 10000;
     opacity: 1;
     transition: opacity var(--transition-slow);
-    cursor: none;
+    cursor: auto;
     font-family: "SUSE Mono" !important;
+}
+
+#bootloader.study-landing {
+    background:
+        radial-gradient(ellipse at 18% 15%, rgba(125, 211, 192, 0.16), transparent 42%),
+        radial-gradient(ellipse at 85% 82%, rgba(108, 146, 206, 0.14), transparent 40%),
+        linear-gradient(135deg, #101a28, #101522 55%, #17212d);
+    padding: 1.5rem;
 }
 
 #bootloader.hidden {
     opacity: 0;
     pointer-events: none;
+}
+
+.study-landing-card {
+    width: min(100%, 620px);
+    padding: clamp(2rem, 6vw, 4rem);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 28px;
+    background: rgba(13, 20, 31, 0.76);
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    backdrop-filter: blur(18px);
+}
+
+.study-landing-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: #a9e5d6;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+}
+
+.study-landing-brand i {
+    font-size: 1.1rem;
+}
+
+.study-landing-illustration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    height: 150px;
+    margin: 1.2rem 0 0.8rem;
+    color: #b9e8dc;
+}
+
+.study-landing-illustration .fa-book-open {
+    font-size: 5rem;
+    filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.28));
+}
+
+.study-landing-illustration .fa-pencil-alt,
+.study-landing-illustration .fa-lightbulb {
+    align-self: flex-start;
+    margin-top: 1.8rem;
+    color: #f0cc85;
+    font-size: 1.5rem;
+}
+
+.study-landing-illustration .fa-lightbulb {
+    align-self: flex-end;
+    margin: 0 0 1.9rem;
+    color: #a8c8f0;
+}
+
+.study-landing-eyebrow {
+    margin-bottom: 0.7rem;
+    color: #9cb4c2;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+}
+
+.study-landing-title {
+    color: #f0f5f4;
+    font-family: fontb, sans-serif;
+    font-size: clamp(1.7rem, 5vw, 2.35rem);
+}
+
+.study-landing-description {
+    max-width: 440px;
+    margin: 1rem auto 1.8rem;
+    color: #b5c2c9;
+    font-family: font, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.9;
+}
+
+.study-landing-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.study-open-button,
+.study-cli-button {
+    min-height: 48px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.study-open-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    width: min(100%, 330px);
+    padding: 0.85rem 1.2rem;
+    border: 1px solid #a8e4d5;
+    background: #a8e4d5;
+    color: #12221f;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.study-open-button:hover {
+    background: #c4f2e7;
+    transform: translateY(-1px);
+}
+
+.study-cli-button {
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(220, 234, 238, 0.2);
+    background: transparent;
+    color: #c5d1d8;
+    font-size: 0.8rem;
+}
+
+.study-cli-button:hover {
+    border-color: #a8e4d5;
+    color: #fff;
+}
+
+.study-landing-note {
+    margin-top: 1.2rem;
+    color: #899aa5;
+    font-size: 0.72rem;
 }
 
 .boot-logo {
